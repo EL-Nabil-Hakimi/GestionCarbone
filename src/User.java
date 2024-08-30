@@ -8,7 +8,7 @@ class User {
     protected String name;
     protected int age;
     protected String CIN;
-    protected List<CarbonData> carbonDataList; // List to store multiple entries of carbon data
+    protected List<CarbonData> carbonDataList;
 
     public User(String CIN) {
         this.CIN = CIN;
@@ -22,7 +22,7 @@ class User {
 
         System.out.print("Age: ");
         this.age = sc.nextInt();
-        sc.nextLine(); // Consume newline
+        sc.nextLine();
     }
 
     public void showInfo() {
@@ -34,7 +34,7 @@ class User {
         for (CarbonData data : carbonDataList) {
             System.out.println(data);
         }
-        System.out.println("Consommation totale de carbone : " + calculateTotalConsumption() + " tonnes");
+        System.out.println("Consommation totale de carbone : " + calculateTotalConsumption() + " Kg Co²");
     }
 
     public void addDataCarbon(int count) {
@@ -49,7 +49,7 @@ class User {
                 String endDateStr = sc.nextLine();
                 LocalDate endDate = LocalDate.parse(endDateStr);
 
-                System.out.print("Consommation de carbone (en tonnes): ");
+                System.out.print("Consommation de carbone (en Kg Co²): ");
                 float carbon = Float.parseFloat(sc.nextLine());
 
                 carbonDataList.add(new CarbonData(startDate, endDate, carbon));
@@ -71,17 +71,19 @@ class User {
 
     public void analyzeConsumption() {
         System.out.println("Analyse de la consommation de carbone:");
-        System.out.println("Consommation quotidienne:");
-        System.out.println("Total : " + calculateTotalConsumption() + " tonnes");
+        System.out.print("Consommation quotidienne ");
+        System.out.println("Total : " + calculateTotalConsumption() + " Kg Co²");
 
         float dailyConsumption = calculateConsumptionForPeriod(ChronoUnit.DAYS);
-        System.out.println("Consommation moyenne quotidienne : " + dailyConsumption + " tonnes");
+
+        System.out.println("Consommation moyenne quotidienne : " + dailyConsumption + " Kg Co²");
 
         float weeklyConsumption = calculateConsumptionForPeriod(ChronoUnit.WEEKS);
-        System.out.println("Consommation moyenne hebdomadaire : " + weeklyConsumption + " tonnes");
+
+        System.out.println("Consommation moyenne hebdomadaire : " + weeklyConsumption + " Kg Co²");
 
         float monthlyConsumption = calculateConsumptionForPeriod(ChronoUnit.MONTHS);
-        System.out.println("Consommation moyenne mensuelle : " + monthlyConsumption + " tonnes");
+        System.out.println("Consommation moyenne mensuelle : " + monthlyConsumption + " Kg Co²");
     }
 
     private float calculateConsumptionForPeriod(ChronoUnit unit) {
@@ -101,4 +103,3 @@ class User {
         }
     }
 }
-

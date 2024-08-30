@@ -23,8 +23,20 @@ class CarbonData {
         return carbon;
     }
 
+    public void setDateStart(LocalDate dateStart) {
+        this.dateStart = dateStart;
+    }
+
+    public void setDateEnd(LocalDate dateEnd) {
+        this.dateEnd = dateEnd;
+    }
+
+    public void setCarbon(float carbon) {
+        this.carbon = carbon;
+    }
+
     @Override
     public String toString() {
-        return "{date début: " + dateStart + ", date fin: " + dateEnd + ", consommation: " + carbon + " tonnes}";
+        return "{date début: " + dateStart + ", date fin: " + dateEnd + ", consommation: " + carbon + " Kg Co²}";
     }
 }
