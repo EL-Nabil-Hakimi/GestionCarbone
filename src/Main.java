@@ -8,20 +8,22 @@ public class Main {
 
         while (true) {
             System.out.println("__________________GreenPulse__________________");
-            System.out.println("**********************************************\n");
+            System.out.println("==============================================");
             System.out.println("Calcul de la consommation de carbone");
             System.out.println("Votre choix ?");
             System.out.print(
-                    "    -> 1. Saisir vos informations \n" +
-                            "    -> 2. Afficher les infos utilisateurs\n" +
-                            "    -> 3. Saisir les données de carbone \n" +
-                            "    -> 4. Analyse de la consommation\n" +
-                            "    -> 0. Quitter\n");
+                            "|=> 1. Saisir vos informations \n" +
+                            "|=> 2. Afficher les infos utilisateurs\n" +
+                            "|=> 3. Saisir les données de carbone \n" +
+                            "|=> 4. Analyse de la consommation\n" +
+                            "|=> 5. Supprimer l'utilisateur\n" +
+                            "|=> 0. Quitter\n");
+
+            System.out.println("==============================================");
             System.out.println("______________________________________________");
-            System.out.println("**********************************************");
             System.out.print("Choix ? : ");
             int choix = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
 
             switch (choix) {
                 case 1:
@@ -36,6 +38,7 @@ public class Main {
                         System.out.println("Utilisateur avec ce CIN existe déjà!");
                     }
                     break;
+
                 case 2:
                     System.out.println("Liste des utilisateurs:");
                     for (User user : users.values()) {
@@ -65,8 +68,21 @@ public class Main {
                         System.out.println("Utilisateur introuvable.");
                     }
                     break;
+                case 5:
+                    System.out.print("Entrez le CIN pour supprimer l'utilisateur: ");
+                    CIN = scanner.nextLine();
+                    User checkUser = users.get(CIN);
+                    if (checkUser == null) {
+                        System.out.println("Utilisateur introuvable.");
+                        break;
+                    } else {
+                        users.remove(CIN);
+                    }
+                    System.out.println("Utilisateur supprimé avec succès!");
+                    break;
+
                 case 0:
-                    System.out.println("<---- Au revoir :) ---->");
+                    System.out.println("<====== Au revoir :) ======>");
                     scanner.close();
                     System.exit(0);
                     break;

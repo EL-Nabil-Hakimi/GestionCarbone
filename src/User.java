@@ -26,7 +26,8 @@ class User {
     }
 
     public void showInfo() {
-        System.out.println("Informations de l'utilisateur:");
+        System.out.println("============================================================================================");
+        System.out.println("============================== Informations de l'utilisateur: ==============================");
         System.out.println("Nom: " + name);
         System.out.println("Age: " + age);
         System.out.println("CIN: " + CIN);
@@ -35,6 +36,8 @@ class User {
             System.out.println(data);
         }
         System.out.println("Consommation totale de carbone : " + calculateTotalConsumption() + " Kg Co²");
+        System.out.println("============================================================================================");
+
     }
 
     public void addDataCarbon(int count) {
@@ -102,4 +105,5 @@ class User {
             return 0;
         }
     }
+
 }
