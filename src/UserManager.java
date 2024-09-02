@@ -1,9 +1,8 @@
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.time.temporal.WeekFields;
+import java.util.*;
+import java.util.Locale;
 
 public class UserManager {
 
@@ -15,7 +14,7 @@ public class UserManager {
 
         System.out.print("Age: ");
         user.setAge(sc.nextInt());
-        sc.nextLine(); // Consume newline
+        sc.nextLine();
     }
 
     public static void showUserInfo(User user) {
@@ -54,16 +53,16 @@ public class UserManager {
     }
 
     public static float calculateTotalConsumption(User user) {
-        return (float) user.getCarbonDataList().stream().mapToDouble(CarbonData::getCarbon).sum();
+        float totalConsumption = 0;
+        for (CarbonData data : user.getCarbonDataList()) {
+            totalConsumption += data.getCarbon();
+        }
+        return totalConsumption;
     }
 
     public static void analyzeConsumption(User user) {
         System.out.println("Analyse de la consommation de carbone:");
         System.out.println("Total : " + calculateTotalConsumption(user) + " Kg Co²");
-
-        System.out.println("Consommation moyenne quotidienne : " + calculateAverageConsumption(user, ChronoUnit.DAYS) + " Kg Co²");
-        System.out.println("Consommation moyenne hebdomadaire : " + calculateAverageConsumption(user, ChronoUnit.WEEKS) + " Kg Co²");
-        System.out.println("Consommation moyenne mensuelle : " + calculateAverageConsumption(user, ChronoUnit.MONTHS) + " Kg Co²");
 
         generateDailyReport(user);
         generateWeeklyReport(user);
@@ -92,31 +91,109 @@ public class UserManager {
 
     private static void generateDailyReport(User user) {
         System.out.println("\n=== Rapport Quotidien ===");
-        user.getCarbonDataList().forEach(data -> {
+        for (CarbonData data : user.getCarbonDataList()) {
             System.out.println(data.getDateStart() + ": " + data.getCarbon() + " Kg Co²");
-        });
+        }
     }
 
     private static void generateWeeklyReport(User user) {
         System.out.println("\n=== Rapport Hebdomadaire ===");
-        user.getCarbonDataList().stream()
-                .collect(Collectors.groupingBy(data -> {
-                    LocalDate startOfWeek = data.getDateStart().with(java.time.DayOfWeek.MONDAY);
-                    return startOfWeek;
-                }))
-                .forEach((weekStart, weekData) -> {
-                    float weeklyTotal = (float) weekData.stream().mapToDouble(CarbonData::getCarbon).sum();
-                    System.out.println("Semaine du " + weekStart + ": " + weeklyTotal + " Kg Co²");
-                });
+
+        LocalDate minDate = null;
+        LocalDate maxDate = null;
+
+        for (CarbonData data : user.getCarbonDataList()) {
+            LocalDate dataStart = data.getDateStart();
+            LocalDate dataEnd = data.getDateEnd();
+
+            if (minDate == null || dataStart.isBefore(minDate)) {
+                minDate = dataStart;
+            }
+            if (maxDate == null || dataEnd.isAfter(maxDate)) {
+                maxDate = dataEnd;
+            }
+        }
+
+        if (minDate == null) {
+            minDate = LocalDate.now();
+        }
+        if (maxDate == null) {
+            maxDate = LocalDate.now();
+        }
+
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        LocalDate weekStart = minDate.with(weekFields.dayOfWeek(), 1);
+        while (weekStart.isBefore(maxDate)) {
+            final LocalDate startOfWeek = weekStart;
+            float weeklyTotal = 0;
+
+            for (CarbonData data : user.getCarbonDataList()) {
+                LocalDate dataStart = data.getDateStart();
+                LocalDate dataEnd = data.getDateEnd();
+
+                LocalDate overlapStart = dataStart.isBefore(startOfWeek) ? startOfWeek : dataStart;
+                LocalDate overlapEnd = dataEnd.isAfter(startOfWeek.plusDays(6)) ? startOfWeek.plusDays(6) : dataEnd;
+
+                if (!overlapStart.isAfter(overlapEnd)) {
+                    long overlapDays = ChronoUnit.DAYS.between(overlapStart, overlapEnd) + 1;
+                    long totalDays = ChronoUnit.DAYS.between(dataStart, dataEnd) + 1;
+                    float weeklyConsumption = (data.getCarbon() * overlapDays) / totalDays;
+                    weeklyTotal += weeklyConsumption;
+                }
+            }
+
+            System.out.println("Semaine du " + startOfWeek + ": " + weeklyTotal + " Kg Co²");
+            weekStart = weekStart.plusWeeks(1);
+        }
     }
 
     private static void generateMonthlyReport(User user) {
         System.out.println("\n=== Rapport Mensuel ===");
-        user.getCarbonDataList().stream()
-                .collect(Collectors.groupingBy(data -> data.getDateStart().withDayOfMonth(1)))
-                .forEach((monthStart, monthData) -> {
-                    float monthlyTotal = (float) monthData.stream().mapToDouble(CarbonData::getCarbon).sum();
-                    System.out.println("Mois de " + monthStart.getMonth() + " " + monthStart.getYear() + ": " + monthlyTotal + " Kg Co²");
-                });
+
+        LocalDate minDate = null;
+        LocalDate maxDate = null;
+
+        for (CarbonData data : user.getCarbonDataList()) {
+            LocalDate dataStart = data.getDateStart();
+            LocalDate dataEnd = data.getDateEnd();
+
+            if (minDate == null || dataStart.isBefore(minDate)) {
+                minDate = dataStart;
+            }
+            if (maxDate == null || dataEnd.isAfter(maxDate)) {
+                maxDate = dataEnd;
+            }
+        }
+
+        if (minDate == null) {
+            minDate = LocalDate.now();
+        }
+        if (maxDate == null) {
+            maxDate = LocalDate.now();
+        }
+
+        LocalDate monthStart = minDate.withDayOfMonth(1);
+        while (monthStart.isBefore(maxDate)) {
+            final LocalDate startOfMonth = monthStart;
+            float monthlyTotal = 0;
+
+            for (CarbonData data : user.getCarbonDataList()) {
+                LocalDate dataStart = data.getDateStart();
+                LocalDate dataEnd = data.getDateEnd();
+
+                LocalDate overlapStart = dataStart.isBefore(startOfMonth) ? startOfMonth : dataStart;
+                LocalDate overlapEnd = dataEnd.isAfter(startOfMonth.plusMonths(1).minusDays(1)) ? startOfMonth.plusMonths(1).minusDays(1) : dataEnd;
+
+                if (!overlapStart.isAfter(overlapEnd)) {
+                    long overlapDays = ChronoUnit.DAYS.between(overlapStart, overlapEnd) + 1;
+                    long totalDays = ChronoUnit.DAYS.between(dataStart, dataEnd) + 1;
+                    float monthlyConsumption = (data.getCarbon() * overlapDays) / totalDays;
+                    monthlyTotal += monthlyConsumption;
+                }
+            }
+
+            System.out.println("Mois de " + startOfMonth.getMonth() + " " + startOfMonth.getYear() + ": " + monthlyTotal + " Kg Co²");
+            monthStart = monthStart.plusMonths(1);
+        }
     }
 }

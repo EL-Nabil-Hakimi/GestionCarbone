@@ -8,13 +8,11 @@ public class User {
     private String CIN;
     private List<CarbonData> carbonDataList;
 
-    // Constructor
     public User(String CIN) {
         this.CIN = CIN;
         this.carbonDataList = new ArrayList<>();
     }
 
-    // Getters and Setters
     public String getName() {
         return name;
     }
@@ -47,7 +45,6 @@ public class User {
         this.carbonDataList = carbonDataList;
     }
 
-    // Methods
     public void addInfo(String name, int age) {
         this.name = name;
         this.age = age;
