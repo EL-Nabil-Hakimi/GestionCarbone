@@ -1,6 +1,6 @@
 import java.time.LocalDate;
 
-class CarbonData {
+public class CarbonData {
     private LocalDate dateStart;
     private LocalDate dateEnd;
     private float carbon;
@@ -11,24 +11,25 @@ class CarbonData {
         this.carbon = carbon;
     }
 
+    // Getters and Setters
     public LocalDate getDateStart() {
         return dateStart;
-    }
-
-    public LocalDate getDateEnd() {
-        return dateEnd;
-    }
-
-    public float getCarbon() {
-        return carbon;
     }
 
     public void setDateStart(LocalDate dateStart) {
         this.dateStart = dateStart;
     }
 
+    public LocalDate getDateEnd() {
+        return dateEnd;
+    }
+
     public void setDateEnd(LocalDate dateEnd) {
         this.dateEnd = dateEnd;
+    }
+
+    public float getCarbon() {
+        return carbon;
     }
 
     public void setCarbon(float carbon) {
@@ -37,6 +38,6 @@ class CarbonData {
 
     @Override
     public String toString() {
-        return "{date début: " + dateStart + ", date fin: " + dateEnd + ", consommation: " + carbon + " Kg Co²}";
+        return "Date début: " + dateStart + ", Date fin: " + dateEnd + ", Consommation de carbone: " + carbon + " Kg Co²";
     }
 }
