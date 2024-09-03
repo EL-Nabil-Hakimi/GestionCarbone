@@ -1,111 +1,128 @@
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+
         HashMap<String, User> users = new HashMap<>();
-        Scanner scanner = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
+        User currentUser = null;
 
         while (true) {
-            System.out.println("__________________GreenPulse__________________");
-            System.out.println("==============================================");
-            System.out.println("Calcul de la consommation de carbone");
-            System.out.println("Votre choix ?");
-            System.out.print(
-                    "|=> 1. Saisir vos informations \n" +
-                            "|=> 2. Afficher les infos utilisateurs\n" +
-                            "|=> 3. Saisir les données de carbone \n" +
-                            "|=> 4. Analyse de la consommation\n" +
-                            "|=> 5. Supprimer l'utilisateur\n" +
-                            "|=> 0. Quitter\n");
-
-            System.out.println("==============================================");
-            System.out.println("______________________________________________");
-            System.out.print("Choix ? : ");
-
-            int choix = -1;
-            try {
-                choix = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-            } catch (Exception e) {
-                System.out.println("Erreur de saisie. Veuillez entrer un nombre.");
-                scanner.nextLine(); // Clear the invalid input
-                continue;
-            }
+            printMenu();
+            System.out.print("Choix : ");
+            int choix = sc.nextInt();
+            sc.nextLine(); // Consume newline character
 
             switch (choix) {
                 case 1:
-                    System.out.print("Entrez votre CIN : ");
-                    String CIN = scanner.nextLine();
-                    if (!users.containsKey(CIN)) {
-                        User user = new User(CIN);
-                        UserManager.addUser(user);
-                        users.put(CIN, user);
-                        System.out.println("Utilisateur ajouté avec succès!");
-                    } else {
-                        System.out.println("Utilisateur avec ce CIN existe déjà!");
-                    }
+                    System.out.print("CIN : ");
+                    String cin = sc.nextLine();
+                    User newUser = new User(cin, "", 0);
+                    UserManager.addUser(newUser, cin);
+                    users.put(cin, newUser);
+                    currentUser = newUser;
                     break;
 
                 case 2:
-                    System.out.println("Liste des utilisateurs:");
-                    for (User user : users.values()) {
-                        UserManager.showUserInfo(user);
+                    if (currentUser != null) {
+                        UserManager.showUserInfo(currentUser);
+                    } else {
+                        System.out.println("Aucun utilisateur sélectionné.");
                     }
                     break;
 
                 case 3:
-                    System.out.print("Entrez le CIN pour saisir les données de carbone: ");
-                    CIN = scanner.nextLine();
-                    User userForData = users.get(CIN);
-                    if (userForData != null) {
-                        System.out.print("Combien d'enregistrements de consommation souhaitez-vous saisir? : ");
-                        int count;
-                        try {
-                            count = scanner.nextInt();
-                            scanner.nextLine(); // Consume newline
-                        } catch (Exception e) {
-                            System.out.println("Erreur de saisie. Veuillez entrer un nombre.");
-                            scanner.nextLine(); // Clear the invalid input
-                            break;
-                        }
-                        UserManager.addDataCarbon(userForData, count);
-                    } else {
-                        System.out.println("Utilisateur introuvable.");
+                    for (User data : users.values()) {
+                        UserManager.showUserInfo(data);
                     }
                     break;
 
                 case 4:
-                    System.out.print("Entrez le CIN pour analyser la consommation: ");
-                    CIN = scanner.nextLine();
-                    User userForAnalysis = users.get(CIN);
-                    if (userForAnalysis != null) {
-                        UserManager.analyzeConsumption(userForAnalysis);
+                    if (currentUser != null) {
+                        UserManager.addConsumption(currentUser);
+                    } else {
+                        System.out.println("Aucun utilisateur sélectionné.");
+                    }
+                    break;
+
+                case 5:
+                    System.out.println("=============== Rapport quotidiennement ===============");
+                    if (currentUser != null) {
+                        UserManager.Daily(currentUser);
+                    } else {
+                        System.out.println("Aucun utilisateur sélectionné.");
+                    }
+                    break;
+
+                case 6:
+                    System.out.println("=============== Rapport hebdomadairement ===============");
+                    if (currentUser != null) {
+                        UserManager.Weekly(currentUser);
+                    } else {
+                        System.out.println("Aucun utilisateur sélectionné.");
+                    }
+                    break;
+
+                case 7:
+                    System.out.println("=============== Rapport mensuellement ===============");
+                    if (currentUser != null) {
+                        UserManager.Monthly(currentUser);
+                    } else {
+                        System.out.println("Aucun utilisateur sélectionné.");
+                    }
+                    break;
+
+                case 8:
+                    System.out.print("Entrez le CIN pour supprimer l'utilisateur: ");
+                    String cinToRemove = sc.nextLine();
+                    if (users.remove(cinToRemove) != null) {
+                        System.out.println("Utilisateur supprimé avec succès :) ");
+                        if (currentUser != null && currentUser.getCin().equals(cinToRemove)) {
+                            currentUser = null;
+                        }
                     } else {
                         System.out.println("Utilisateur introuvable.");
                     }
                     break;
 
-                case 5:
-                    System.out.print("Entrez le CIN pour supprimer l'utilisateur: ");
-                    CIN = scanner.nextLine();
-                    if (users.remove(CIN) != null) {
-                        System.out.println("Utilisateur supprimé avec succès!");
+                case 9:
+                    System.out.print("Entrez le CIN pour changer l'utilisateur: ");
+                    String cinToChange = sc.nextLine();
+                    User selectedUser = users.get(cinToChange);
+                    if (selectedUser != null) {
+                        currentUser = selectedUser;
+                        System.out.println("Utilisateur changé avec succès.");
                     } else {
                         System.out.println("Utilisateur introuvable.");
                     }
                     break;
 
                 case 0:
-                    System.out.println("<====== Au revoir :) ======>");
-                    scanner.close();
+                    System.out.println("Exiting program.");
                     System.exit(0);
                     break;
 
                 default:
-                    System.out.println("Choix invalide, veuillez réessayer.");
-                    break;
+                    System.out.println("Choix invalide.");
             }
         }
+    }
+
+    private static void printMenu() {
+        System.out.println("======== Menu Principal ========");
+        System.out.println("1. Ajouter un utilisateur");
+        System.out.println("2. Afficher les informations de l'utilisateur sélectionné");
+        System.out.println("3. Afficher les informations de tous les utilisateurs");
+        System.out.println("4. Ajouter une consommation");
+        System.out.println("5. Rapport quotidien");
+        System.out.println("6. Rapport hebdomadaire");
+        System.out.println("7. Rapport mensuel");
+        System.out.println("8. Supprimer un utilisateur");
+        System.out.println("9. Changer d'utilisateur");
+        System.out.println("0. Quitter");
+        System.out.println("================================");
     }
 }

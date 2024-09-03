@@ -1,24 +1,25 @@
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class User {
+    private String cin;
     private String name;
     private int age;
-    private String CIN;
-    private List<CarbonData> carbonDataList;
+    private List<Consumption> consumptionList;
 
-    public User(String CIN) {
-        this.CIN = CIN;
-        this.carbonDataList = new ArrayList<>();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public User(String cin, String name, int age) {
+        this.cin = cin;
         this.name = name;
+        this.age = age;
+        this.consumptionList = new ArrayList<>();
+    }
+
+    public String getCin() {
+        return cin;
+    }
+
+    public void setCin(String cin) {
+        this.cin = cin;
     }
 
     public int getAge() {
@@ -29,28 +30,23 @@ public class User {
         this.age = age;
     }
 
-    public String getCIN() {
-        return CIN;
+    public String getName() {
+        return name;
     }
 
-    public void setCIN(String CIN) {
-        this.CIN = CIN;
-    }
-
-    public List<CarbonData> getCarbonDataList() {
-        return carbonDataList;
-    }
-
-    public void setCarbonDataList(List<CarbonData> carbonDataList) {
-        this.carbonDataList = carbonDataList;
-    }
-
-    public void addInfo(String name, int age) {
+    public void setName(String name) {
         this.name = name;
-        this.age = age;
     }
 
-    public void addDataCarbon(CarbonData carbonData) {
-        this.carbonDataList.add(carbonData);
+    public List<Consumption> getConsumptionList() {
+        return consumptionList;
+    }
+
+
+    public void addConsumption(Consumption consumption ) {
+        if (this.consumptionList == null) {
+            this.consumptionList = new ArrayList<>();
+        }
+        this.consumptionList.add(consumption);
     }
 }
