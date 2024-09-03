@@ -3,8 +3,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 
 public class UserManager {
 
@@ -73,17 +72,19 @@ public class UserManager {
     public static void Weekly(User user) {
         System.out.println("\n=== Rapport Hebdomadaire ===");
 
+        List<Consumption> consumptionList = user.getConsumptionList();
+        Map<LocalDate, Float> weeklyTotals = new HashMap<>();
+
         LocalDate minDate = null;
         LocalDate maxDate = null;
 
-        for (Consumption data : user.getConsumptionList()) {
+        for (Consumption data : consumptionList) {
             LocalDate dataStart = data.getStartDate();
             LocalDate dataEnd = data.getEndDate();
 
             if (minDate == null || dataStart.isBefore(minDate)) {
                 minDate = dataStart;
             }
-
             if (maxDate == null || dataEnd.isAfter(maxDate)) {
                 maxDate = dataEnd;
             }
@@ -92,13 +93,14 @@ public class UserManager {
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
         LocalDate weekStart = minDate.with(weekFields.dayOfWeek(), 1);
 
-        while (weekStart.isBefore(maxDate.plusDays(1))) {
+        while (weekStart.isBefore(maxDate)) {
             final LocalDate startOfWeek = weekStart;
             float weeklyTotal = 0;
 
-            for (Consumption data : user.getConsumptionList()) {
+            for (Consumption data : consumptionList) {
                 LocalDate dataStart = data.getStartDate();
                 LocalDate dataEnd = data.getEndDate();
+                float consumption = data.getConsumption();
 
                 LocalDate overlapStart = dataStart.isBefore(startOfWeek) ? startOfWeek : dataStart;
                 LocalDate overlapEnd = dataEnd.isAfter(startOfWeek.plusDays(6)) ? startOfWeek.plusDays(6) : dataEnd;
@@ -106,57 +108,59 @@ public class UserManager {
                 if (!overlapStart.isAfter(overlapEnd)) {
                     long overlapDays = ChronoUnit.DAYS.between(overlapStart, overlapEnd) + 1;
                     long totalDays = ChronoUnit.DAYS.between(dataStart, dataEnd) + 1;
-                    float weeklyConsumption = (data.getConsumption() * overlapDays) / totalDays;
+                    float weeklyConsumption = (consumption * overlapDays) / totalDays;
+
                     weeklyTotal += weeklyConsumption;
                 }
             }
 
-            System.out.println("Semaine du " + startOfWeek +" <-to-> " + startOfWeek.plusDays(6) + ": "  + weeklyTotal + " Kg Co²");
+            weeklyTotals.put(startOfWeek, weeklyTotal);
+
             weekStart = weekStart.plusWeeks(1);
+        }
+
+        for (Map.Entry<LocalDate, Float> entry : weeklyTotals.entrySet()) {
+            LocalDate week = entry.getKey();
+            float totalConsumption = entry.getValue();
+            System.out.println("Semaine du " + week + ": " + totalConsumption + " Kg Co²");
         }
     }
 
     public static void Monthly(User user) {
         System.out.println("\n=== Rapport Mensuel ===");
 
-        LocalDate minDate = null;
-        LocalDate maxDate = null;
+        List<Consumption> consumptionList = user.getConsumptionList();
+        Map<LocalDate, Float> monthlyTotals = new HashMap<>();
 
-        for (Consumption data : user.getConsumptionList()) {
+        for (Consumption data : consumptionList) {
             LocalDate dataStart = data.getStartDate();
             LocalDate dataEnd = data.getEndDate();
+            float consumption = data.getConsumption();
 
-            if (minDate == null || dataStart.isBefore(minDate)) {
-                minDate = dataStart;
-            }
-            if (maxDate == null || dataEnd.isAfter(maxDate)) {
-                maxDate = dataEnd;
-            }
-        }
+            LocalDate monthStart = dataStart.withDayOfMonth(1);
+            LocalDate monthEnd = monthStart.plusMonths(1).minusDays(1);
 
-        LocalDate monthStart = minDate.withDayOfMonth(1);
-
-        while (monthStart.isBefore(maxDate.plusMonths(1))) {
-            final LocalDate startOfMonth = monthStart;
-            float monthlyTotal = 0;
-
-            for (Consumption data : user.getConsumptionList()) {
-                LocalDate dataStart = data.getStartDate();
-                LocalDate dataEnd = data.getEndDate();
-
-                LocalDate overlapStart = dataStart.isBefore(startOfMonth) ? startOfMonth : dataStart;
-                LocalDate overlapEnd = dataEnd.isAfter(startOfMonth.plusMonths(1).minusDays(1)) ? startOfMonth.plusMonths(1).minusDays(1) : dataEnd;
+            while (!monthStart.isAfter(dataEnd)) {
+                LocalDate overlapStart = monthStart.isBefore(dataStart) ? dataStart : monthStart;
+                LocalDate overlapEnd = monthEnd.isAfter(dataEnd) ? dataEnd : monthEnd;
 
                 if (!overlapStart.isAfter(overlapEnd)) {
                     long overlapDays = ChronoUnit.DAYS.between(overlapStart, overlapEnd) + 1;
                     long totalDays = ChronoUnit.DAYS.between(dataStart, dataEnd) + 1;
-                    float monthlyConsumption = (data.getConsumption() * overlapDays) / totalDays;
-                    monthlyTotal += monthlyConsumption;
-                }
-            }
+                    float monthlyConsumption = (consumption * overlapDays) / totalDays;
 
-            System.out.println("Mois de " + startOfMonth.getMonth() + " " + startOfMonth.getYear() + ": " + monthlyTotal + " Kg Co²");
-            monthStart = monthStart.plusMonths(1);
+                    monthlyTotals.put(monthStart, monthlyTotals.getOrDefault(monthStart, 0f)
+                            + monthlyConsumption);
+                }
+
+                monthStart = monthStart.plusMonths(1);
+                monthEnd = monthEnd.plusMonths(1).minusDays(1);
+            }
         }
-    }
-}
+
+        for (Map.Entry<LocalDate, Float> entry : monthlyTotals.entrySet()) {
+            LocalDate month = entry.getKey();
+            float totalConsumption = entry.getValue();
+            System.out.println("Mois de " + month.getMonth() + " " + month.getYear() + ": " + totalConsumption + " Kg Co²");
+        }
+    }}
