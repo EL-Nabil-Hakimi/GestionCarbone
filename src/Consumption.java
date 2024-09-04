@@ -37,10 +37,6 @@ public class Consumption {
 
     @Override
     public String toString() {
-        return "Consumption{" +
-                "StartDate=" + StartDate +
-                ", EndDate=" + EndDate +
-                ", Consumption=" + Consumption +
-                '}';
+        return  StartDate +" <-> " + EndDate +", Consumption=" + Consumption ;
     }
 }

@@ -41,7 +41,8 @@ public class UserManager {
         return totalConsumption;
     }
 
-    public static void addConsumption(User user) {
+    public static boolean addConsumption(User user) {
+
         System.out.println("=========== Ajouter une Consommation =========");
 
         System.out.print("Date Debut (yyyy-MM-dd) : ");
@@ -51,7 +52,17 @@ public class UserManager {
         System.out.print("Consommation (Kg/Co²) : ");
         float consumption = Float.parseFloat(sc.next());
 
-        user.addConsumption(new Consumption(startDate, endDate, consumption));
+
+            boolean check = CheckDates.isAvailableOn(startDate , endDate , user.getConsumptionList());
+            if(check)
+            {
+                user.addConsumption(new Consumption(startDate, endDate, consumption));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
     }
 
     public static void Daily(User user) {
@@ -63,7 +74,7 @@ public class UserManager {
 
             LocalDate currentDate = startDate;
             while (!currentDate.isAfter(endDate)) {
-                System.out.println("Consommation du " + currentDate + ": " + dailyConsumptionRate + " Kg/Co²");
+                System.out.println("Consommation du " + currentDate + ": " +String.format("%.2f" ,dailyConsumptionRate )     + " Kg/Co²");
                 currentDate = currentDate.plusDays(1);
             }
         }
@@ -122,7 +133,7 @@ public class UserManager {
         for (Map.Entry<LocalDate, Float> entry : weeklyTotals.entrySet()) {
             LocalDate week = entry.getKey();
             float totalConsumption = entry.getValue();
-            System.out.println("Semaine du " + week + ": " + totalConsumption + " Kg Co²");
+            System.out.println("Semaine du " + week + ": " +String.format("%.2f",totalConsumption)  + " Kg Co²");
         }
     }
 
@@ -161,6 +172,6 @@ public class UserManager {
         for (Map.Entry<LocalDate, Float> entry : monthlyTotals.entrySet()) {
             LocalDate month = entry.getKey();
             float totalConsumption = entry.getValue();
-            System.out.println("Mois de " + month.getMonth() + " " + month.getYear() + ": " + totalConsumption + " Kg Co²");
+            System.out.println("Mois de " + month.getMonth() + " " + month.getYear() + ": " +String.format("%.2f" ,  totalConsumption)  + " Kg Co²");
         }
     }}
